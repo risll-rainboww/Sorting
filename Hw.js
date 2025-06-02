@@ -1,12 +1,13 @@
-// Hw.js - 整理版 (大量中文注释)
+/*这一部分写的很乱，因为总是删删减减的，建议看说明文档*/
 
-// --- 全局变量和 DOM 元素获取 ---
+// --- 全局变量和 DOM 元素获取 ------------------------------------------------------------------------------------
 let arr = []; // 存储当前用于排序和显示的数组
 const treeContainer = document.getElementById('tree-container'); // 树的可视化容器 DIV 元素
 const barsContainer = document.getElementById('bars');   // 柱状图的可视化容器 DIV 元素
 const descriptionTextElement = document.getElementById('description-text'); // 用于显示算法步骤说明的 P 元素
 
 // 获取控制按钮的 DOM 元素，以便后续操作 (如禁用/启用)
+// 确保这些ID与HTML中的ID一致
 const initArrayBtn = document.getElementById('initArrayBtn');     // "生成无序数组" 按钮
 const startSortBtn = document.getElementById('startSortBtn');     // "开始" 按钮
 const pauseBtn = document.getElementById('pauseBtn');         // "暂停/继续" 按钮
@@ -15,11 +16,11 @@ const paceSelect = document.getElementById('paceSelect');       // "倍速" 下�
 // 状态标志和配置变量
 let isPaused = false;    // 标记当前排序是否处于暂停状态 (true: 已暂停, false: 未暂停/运行中)
 let isSorting = false;   // 标记当前是否正在进行排序过程 (true: 正在排序, false: 未开始或已结束)
-let pace = 600;        // 动画基础步长/延迟时间 (单位: 毫秒)，影响动画快慢
+let pace = 900;        // 动画基础步长/延迟时间 (单位: 毫秒)，影响动画快慢 (HTML中默认值是900)
 let treeOffset = { dx: 0, dy: 0 }; // 整个树的拖拽偏移量 (dx: 水平偏移, dy: 垂直偏移)
 let nodeOffsets = [];  // 存储每个节点单独的拖拽偏移量数组，数组索引对应节点索引
 
-// --- 文字说明更新函数 ---
+// --- 文字说明更新函数 ------------------------------------------------------------------------------
 /**
  * 更新树形图旁边的说明文字。
  * @param {string} text - 要显示的说明文本。
@@ -30,7 +31,7 @@ function updateDescription(text) {
   }
 }
 
-// --- 动画效果处理函数 ---
+// --- 动画效果处理函数 -----------------------------------------------------------------------------------------
 
 /**
  * 鼠标进入元素时的动画效果 (通用处理函数)。
@@ -43,8 +44,8 @@ function onElementMouseEnter() {
   // }
   anime.remove(this); // 移除该元素 (this 指向触发事件的元素) 上任何正在进行的旧 Anime.js 动画实例
 
-  let scaleValue = 1.2; // 默认放大倍数 (主要用于节点)
-  let transformOriginValue = 'center center'; // 默认变换原点 (从中心缩放)
+  let scaleValue = 1.2; // 节点默认放大倍数
+  let transformOriginValue = 'center center'; // 节点默认变换原点 (从中心缩放)
 
   if (this.classList.contains('bar')) { // 如果悬停的是单个柱子 (.bar)
     // 为柱子应用特定的进入动画
@@ -160,11 +161,7 @@ function playEndSortTitleAnimation() {
       { value: 1.2, duration: 400, easing: 'easeOutExpo' }, // 放大
       { value: 1, duration: 600, easing: 'easeOutBounce' }    // 缩小弹回原大小
     ],
-    rotate: { // 旋转属性的特定动画配置
-      value: '1turn', // 旋转一整圈
-      duration: 1000,
-      easing: 'easeInOutCirc'
-    }
+    
   });
 }
 
@@ -224,7 +221,7 @@ async function animateNodeSwapVisual(i, j) {
 }
 
 
-// --- DOM 更新与渲染函数 ---
+// --- DOM 更新与渲染函数 --------------------------------------------------------------------------------------------------------
 
 /**
  * 根据节点在数组中的索引计算其在树形可视化容器中的像素位置。
@@ -276,7 +273,7 @@ function renderTree(highlight = []) {
       line.setAttribute('y1', fromPos.top + nodeSize / 2 + treeOffset.dy + (nodeOffsets[parentIndex]?.dy || 0));
       line.setAttribute('x2', toPos.left + nodeSize / 2 + treeOffset.dx + (nodeOffsets[i]?.dx || 0));
       line.setAttribute('y2', toPos.top + nodeSize / 2 + treeOffset.dy + (nodeOffsets[i]?.dy || 0));
-      // line 的 stroke 和 stroke-width 等样式已在 CSS 文件中通过 'svg line' 选择器定义
+      // line 的样式已在 CSS 中通过 'svg line' 选择器设置
       svg.appendChild(line); // 将线添加到SVG元素
     }
   });
@@ -284,56 +281,63 @@ function renderTree(highlight = []) {
 
   // 遍历数组，为每个元素创建并显示一个树节点DIV
   arr.forEach((value, i) => {
-    const node = document.createElement('div');
+    const node = document.createElement('div'); // 创建节点DIV
+    // 根据是否在 highlight 数组中，决定是否添加 'highlight' 类以高亮显示
     node.className = 'node' + (highlight.includes(i) ? ' highlight' : '');
-    const pos = getNodePosition(i);
-    // 保证 nodeOffsets[i] 有值
-    if (!nodeOffsets[i]) nodeOffsets[i] = { dx: 0, dy: 0 };
-    node.style.left = (pos.left + treeOffset.dx + nodeOffsets[i].dx) + 'px';
-    node.style.top = (pos.top + treeOffset.dy + nodeOffsets[i].dy) + 'px';
-    node.innerText = value;
+    const pos = getNodePosition(i); // 获取节点应在的位置
+    // 设置节点的left和top样式，同样考虑拖拽偏移
+    node.style.left = (pos.left + treeOffset.dx + (nodeOffsets[i]?.dx || 0)) + 'px';
+    node.style.top = (pos.top + treeOffset.dy + (nodeOffsets[i]?.dy || 0)) + 'px';
+    node.innerText = value; // 在节点上显示其数值
 
-    // 悬停动画
+    // 为节点添加鼠标悬停的进入和离开事件监听器
     node.addEventListener('mouseenter', onElementMouseEnter);
     node.addEventListener('mouseleave', onElementMouseLeave);
 
-    // 拖拽逻辑
+    // 实现节点的拖拽功能
     let dragging = false, startX, startY, currentDragDx, currentDragDy;
-    node.onmousedown = function(e) {
+    node.onmousedown = function(e) { // 鼠标在节点上按下时触发
+      // 只响应鼠标左键，并且在排序过程中禁止拖拽
       if (e.button !== 0 || isSorting) return;
-      dragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      if (i === 0) {
-        currentDragDx = treeOffset.dx;
+      dragging = true; //标记开始拖拽
+      startX = e.clientX; // 记录鼠标按下时的X坐标
+      startY = e.clientY; // 记录鼠标按下时的Y坐标
+
+      // 记录开始拖拽时，节点原有的偏移量
+      if (i === 0) { // 如果拖拽的是根节点 (索引0)
+        currentDragDx = treeOffset.dx; // 移动整个树的偏移
         currentDragDy = treeOffset.dy;
-      } else {
-        currentDragDx = nodeOffsets[i].dx;
-        currentDragDy = nodeOffsets[i].dy;
+      } else { // 如果拖拽的是其他节点
+        currentDragDx = nodeOffsets[i]?.dx || 0; // 移动该节点自身的偏移
+        currentDragDy = nodeOffsets[i]?.dy || 0; // 使用可选链和或运算符确保有默认值0
       }
-      node.style.zIndex = 20;
-      document.onmousemove = function(ev) {
-        if (!dragging) return;
-        let dx = ev.clientX - startX;
-        let dy = ev.clientY - startY;
-        if (i === 0) {
+      node.style.zIndex = 20; // 将被拖拽的节点置于顶层，以免被其他节点遮挡
+
+      document.onmousemove = function(ev) { // 鼠标在文档上移动时触发 (只要拖拽未结束)
+        if (!dragging) return; // 如果未处于拖拽状态，则不处理
+        let dx = ev.clientX - startX; // 计算鼠标水平移动的距离
+        let dy = ev.clientY - startY; // 计算鼠标垂直移动的距离
+
+        // 更新偏移量
+        if (i === 0) { // 更新整个树的偏移
           treeOffset.dx = currentDragDx + dx;
           treeOffset.dy = currentDragDy + dy;
-        } else {
+        } else { // 更新单个节点的偏移
           nodeOffsets[i].dx = currentDragDx + dx;
           nodeOffsets[i].dy = currentDragDy + dy;
         }
-        renderTree(highlight);
+        renderTree(highlight); // 实时重绘整个树以反映拖拽效果
       };
-      document.onmouseup = function() {
-        dragging = false;
-        node.style.zIndex = 10;
+      document.onmouseup = function() { // 鼠标在文档上松开时触发
+        dragging = false; // 标记拖拽结束
+        node.style.zIndex = 10; // 恢复节点的默认 z-index
+        // 清除 document 上的 mousemove 和 mouseup 事件监听器
         document.onmousemove = null;
         document.onmouseup = null;
       };
-      e.preventDefault();
+      e.preventDefault(); // 阻止浏览器默认的拖拽行为 (例如，拖拽图片或选中文本)
     };
-    treeContainer.appendChild(node);
+    treeContainer.appendChild(node); // 将创建的节点DIV添加到树容器中
   });
 }
 
@@ -377,3 +381,338 @@ function renderBars(active = [], swap = []) {
   });
 }
 
+
+// --- 数据处理与辅助函数 -------------------------------------------------------------------------------------------------------------
+
+/**
+ * 从用户输入框获取数组，如果输入无效或为空，则生成随机数组。
+ * @returns {number[]} 处理后的数组。
+ */
+function getArr() {
+  const userInput = document.getElementById('userArray').value.trim(); // 获取输入框内容并去除首尾空格
+  if (userInput) { // 如果用户有输入
+    // 将用户输入的逗号分隔字符串转换为数字数组
+    // 1. split(',') 按逗号分割
+    // 2. map(s => parseInt(s.trim())) 将每个子串去除空格后转换为整数
+    // 3. filter(n => !isNaN(n)) 过滤掉转换失败的非数字项 (NaN)
+    const parsedArray = userInput.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    // 如果解析后的数组有效 (长度大于0)，则返回它；否则返回一个默认的随机数组
+    return parsedArray.length > 0 ? parsedArray : getDefaultArray();
+  }
+  // 如果用户未输入任何内容，则直接返回一个默认的随机数组
+  return getDefaultArray();
+}
+
+/**
+ * 生成一个包含10个随机整数的默认数组。
+ * 每个随机数在10到99之间 (包含10和99)。
+ * @returns {number[]} 默认的随机数组。
+ */
+function getDefaultArray() {
+    // Array.from({ length: 10 }) 创建一个长度为10的空数组 (元素为undefined)
+    // 然后对这个数组的每个位置执行回调函数生成随机数
+    return Array.from({ length: 10 }, () => Math.floor(Math.random() * 90 + 10));
+}
+
+/**
+ * 异步延迟函数，用于在动画步骤之间创建停顿，以便用户观察。
+ * 此函数会响应全局的 isPaused 状态，如果已暂停，则会在此等待直到取消暂停。
+ * @param {number} ms - 需要延迟的毫秒数。
+ */
+async function sleep(ms) {
+  return new Promise(async resolve => { // 返回一个Promise，当延迟结束后解决
+    let remaining = ms; // 剩余需要延迟的时间
+    while (remaining > 0) { // 只要还有剩余时间
+      // 检查是否需要暂停：只有在 isSorting 为 true (正在排序) 且 isPaused 为 true (用户点击了暂停) 时
+      if (isPaused && isSorting) {
+        await new Promise(r => setTimeout(r, 100)); // 短暂等待100ms，然后重新检查暂停状态
+      } else {
+        // 如果不需暂停，则执行一小段延迟 (最多10ms)，以保证对暂停状态的快速响应
+        const delay = Math.min(remaining, 10);
+        await new Promise(r => setTimeout(r, delay));
+        remaining -= delay; // 减去已延迟的时间
+      }
+    }
+    resolve(); // 所有延迟完成后，解决Promise
+  });
+}
+
+
+// --- 堆排序算法逻辑 (MODIFIED to include updateDescription calls) ---
+
+/**
+ * 维护最大堆性质的核心函数 (通常称为 "heapify down" 或 "sift down")。
+ * 假设以节点 i 为根的左右子树都已经是最大堆，此函数调整节点 i，
+ * 使得以节点 i 为根的整个子树也成为最大堆。
+ * @param {number} n - 当前堆的大小 (即数组中参与堆排序部分的长度)。
+ * @param {number} i - 当前需要调整的子树的根节点在数组中的索引。
+ */
+async function heapify(n, i) {
+  if (isPaused && isSorting) await sleep(100); // 检查并响应暂停状态
+  if (!isSorting) return; // 如果排序过程已被取消 (例如用户点击了"生成新数组")，则提前退出
+
+  let largest = i;          // 假设当前节点 i (根) 是其与子节点中值最大的
+  const l = 2 * i + 1;      // 计算左子节点的索引
+  const r = 2 * i + 2;      // 计算右子节点的索引
+
+  // 更新步骤说明文字，显示当前正在调整的节点及其子节点信息
+  updateDescription(`调整节点 ${i} (值 ${arr[i]}) 使其满足大顶堆性质...\n比较其与子节点: \n左子节点 ${l<n ? l + ' (值 ' + arr[l] + ')' : '无'}\n右子节点 ${r<n ? r + ' (值 ' + arr[r] + ')' : '无'}`);
+  // 高亮显示当前节点 i 以及其左右子节点 (如果存在且在堆范围内 n 以内)
+  renderTree([i, l < n ? l : -1, r < n ? r : -1].filter(idx => idx !== -1 && idx < n));
+  renderBars([i, l < n ? l : -1, r < n ? r : -1].filter(idx => idx !== -1 && idx < n));
+  await sleep(pace); // 等待一段时间，以便用户观察高亮和说明
+  if (!isSorting) return; // 再次检查排序状态
+
+  // 比较当前节点 i 与其左子节点 l
+  if (l < n && arr[l] > arr[largest]) { // 如果左子节点存在 (l < n) 并且其值大于当前 largest 节点的值
+    updateDescription(`节点 ${l} (值 ${arr[l]}) > 节点 ${largest} (值 ${arr[largest]}).\n将 ${l} 设为 largest (最大值索引).`);
+    largest = l; // 更新 largest 为左子节点的索引
+    await sleep(pace/2); // 短暂等待，让用户看到文字更新
+  }
+  // 比较当前 largest 节点 (可能是 i 或 l) 与其右子节点 r
+  if (r < n && arr[r] > arr[largest]) { // 如果右子节点存在 (r < n) 并且其值大于当前 largest 节点的值
+    updateDescription(`节点 ${r} (值 ${arr[r]}) > 节点 ${largest} (值 ${arr[largest]}).\n将 ${r} 设为 largest (最大值索引).`);
+    largest = r; // 更新 largest 为右子节点的索引
+    await sleep(pace/2);
+  }
+  if (!isSorting) return; // 再次检查排序状态
+
+  // 如果 largest 不是最初的根节点 i (意味着 i 不是最大的，需要调整)
+  if (largest !== i) {
+    updateDescription(`节点 ${largest} (值 ${arr[largest]}) 是最大的.\n准备交换节点 ${i} (值 ${arr[i]}) 与节点 ${largest} (值 ${arr[largest]}).`);
+    renderTree([i, largest]); // 高亮显示即将交换的两个节点
+    renderBars([], [i, largest]); // 在柱状图中用特定颜色标记这两个节点
+    await sleep(pace / 2);
+    if (!isSorting) return;
+
+    await animateNodeSwapVisual(i, largest); // 执行节点交换的视觉动画
+    [arr[i], arr[largest]] = [arr[largest], arr[i]]; // 实际交换数组中这两个元素的值
+
+    // 交换后更新显示
+    renderTree([i, largest]);
+    renderBars([], [i, largest]);
+    await sleep(pace / 2);
+    if (!isSorting) return;
+
+    // 由于节点 i 的值被换到了 largest 的位置，这个交换可能破坏了以 largest 为根的子树的最大堆性质
+    // 因此，需要对这个新的子树 (根在 largest) 递归调用 heapify
+    updateDescription(`交换完成. 继续对以新位置 ${largest} (原节点 ${i} 的值) 为根的子树进行 heapify 调整.`);
+    await heapify(n, largest);
+  } else {
+    // 如果 largest 等于 i，说明当前节点 i 就是其与子节点中最大的，无需交换调整
+    updateDescription(`节点 ${i} (值 ${arr[i]}) 已是其子树中的最大值，此子树无需调整.`);
+    renderTree([i]); // 只高亮当前节点
+    renderBars([i]);
+    await sleep(pace);
+  }
+}
+
+/**
+ * 构建最大堆。
+ * 从数组的最后一个非叶子节点开始，向前逐个调用 heapify，
+ * 使得整个数组满足最大堆的性质。
+ * 最后一个非叶子节点的索引是 Math.floor(arr.length / 2) - 1。
+ */
+async function buildMaxHeap() {
+  updateDescription("开始构建大顶堆...\n从最后一个非叶子节点开始，向上逐个调整子树。");
+  await sleep(pace); // 初始等待
+  for (let i = Math.floor(arr.length / 2) - 1; i >= 0; i--) { // 遍历所有非叶子节点
+    if (isPaused && isSorting) await sleep(100); // 响应暂停
+    if (!isSorting) return; // 响应排序取消
+    updateDescription(`构建大顶堆: 对索引为 ${i} 的节点 (值为 ${arr[i]}) 执行 heapify 操作。`);
+    await heapify(arr.length, i); // 对当前非叶子节点为根的子树执行 heapify
+    if (!isSorting) return;
+  }
+  updateDescription("大顶堆构建完成！数组顶端 (索引0) 为当前最大元素。");
+  await sleep(pace); // 构建完成后等待
+}
+
+/**
+ * 执行堆排序的主流程。
+ * 1. 构建最大堆。
+ * 2. 循环地将堆顶元素（当前最大值）与堆末尾元素交换，
+ *    然后缩小堆的范围，并对新的堆顶重新执行 heapify 以维护最大堆性质。
+ */
+async function heapSort() {
+  await buildMaxHeap(); // 首先确保整个数组是一个最大堆
+  if (!isSorting) return; // 响应排序取消
+
+  updateDescription("大顶堆已构建完毕. 现在开始排序阶段：\n将堆顶元素与堆的末尾元素交换，然后调整剩余堆。");
+  await sleep(pace);
+  if (!isSorting) return;
+
+  // 从数组的最后一个元素开始，向前迭代到第二个元素 (索引1)
+  // 每次迭代，堆的大小减1 (变量 i 代表当前堆的有效大小，也是待放置已排序元素的位置)
+  for (let i = arr.length - 1; i > 0; i--) {
+    if (isPaused && isSorting) await sleep(100); // 响应暂停
+    if (!isSorting) return;
+
+    // 将堆顶元素 (arr[0]，当前堆中的最大值) 与当前堆的最后一个元素 (arr[i]) 交换
+    updateDescription(`排序阶段: 将堆顶元素 (索引 0, 值 ${arr[0]}) 与当前堆的末尾元素 (索引 ${i}, 值 ${arr[i]}) 进行交换.`);
+    renderTree([0, i]); // 高亮这两个要交换的节点
+    renderBars([], [0, i]); // 在柱状图中标记
+    await sleep(pace / 2);
+    if (!isSorting) return;
+
+    await animateNodeSwapVisual(0, i); // 执行视觉交换动画
+    [arr[0], arr[i]] = [arr[i], arr[0]]; // 实际交换数组元素 (最大值移到末尾)
+
+    // 交换后，元素 arr[i] (原来的堆顶) 已经放到了其最终排序好的位置
+    // 接下来需要处理的是从索引 0 到 i-1 的部分，使其恢复最大堆性质
+    updateDescription(`交换完成. 元素 ${arr[i]} (原堆顶) 已放置到其最终排序位置 (索引 ${i}).\n现在缩小堆的范围 (从索引 0 到 ${i-1}), 并对新的堆顶 (索引 0, 值 ${arr[0]}) 执行 heapify.`);
+    renderTree([0, i]); // 更新显示 (数据已交换)
+    renderBars([], [0, i]);
+    await sleep(pace / 2);
+    if (!isSorting) return;
+
+    await heapify(i, 0); // 对缩小后的堆 (大小为 i，范围是 0 到 i-1) 的根节点 (索引0) 执行 heapify
+    if (!isSorting) return;
+  }
+
+  // 当循环结束 (i减到0)，所有元素都已放到正确位置，排序完成
+  if (isSorting) { // 确保是在排序自然完成的情况下执行这些操作
+      updateDescription("堆排序完成！所有元素已按升序排列。");
+      renderTree([]); // 清除所有高亮
+      renderBars([]);
+      playEndSortTitleAnimation(); // 播放标题庆祝动画
+      document.getElementById('intro-animation').textContent = '排序完成！'; // 更新页面提示文字
+      document.getElementById('intro-animation').style.opacity = '1';
+      document.getElementById('intro-animation').style.display = 'block';
+
+      // 重置按钮状态和标志
+      if(startSortBtn) startSortBtn.disabled = false; // 启用 "开始" 按钮
+      if(initArrayBtn) initArrayBtn.disabled = false; // 启用 "生成无序数组" 按钮
+      isSorting = false; // 标记排序结束
+      isPaused = true;   // 排序结束后，默认为暂停状态，等待下一次操作
+      if(pauseBtn) pauseBtn.textContent = '继续'; // 更新 "暂停/继续" 按钮文本
+  }
+}
+
+
+// --- 事件处理与页面初始化 ---
+
+/**
+ * 初始化数组和界面显示。
+ * 由 "生成无序数组" 按钮点击触发，或在页面加载完成时自动调用。
+ */
+window.initArray = function () {
+  // 确保在 DOMContentLoaded 之后，initArrayBtn 等元素才被使用
+  // 或者将按钮获取移到此函数内部（如果它们只在此函数内使用）
+  if (isSorting && initArrayBtn && initArrayBtn.disabled) return; // 防止在排序过程中意外调用
+  if (isSorting) return; // 如果当前正在排序，则不允许重新初始化数组，防止冲突
+
+
+  arr = getArr(); // 获取新的数组 (用户输入或随机生成)
+  // 重置树和节点的拖拽偏移量
+  treeOffset = { dx: 0, dy: 0 };
+  nodeOffsets = Array(arr.length).fill(null).map(() => ({ dx: 0, dy: 0 })); // 为新数组长度初始化偏移
+
+  // 重置状态标志和按钮
+  isPaused = true; // 生成新数组后，默认为暂停状态
+  if(pauseBtn) pauseBtn.textContent = '继续'; // 更新按钮文本
+  isSorting = false; // 重置排序状态标志
+  if(startSortBtn) startSortBtn.disabled = false; // 启用 "开始" 按钮
+  if(initArrayBtn) initArrayBtn.disabled = false; // 确保 "生成数组" 按钮可用
+  updateDescription("等待操作..."); // 重置步骤说明面板的文字
+
+  // 更新页面顶部的提示文字
+  const introAnimation = document.getElementById('intro-animation');
+  if (introAnimation) {
+    introAnimation.style.display = 'block';
+    introAnimation.style.opacity = '1';
+    introAnimation.textContent = '数组已生成。点击“开始”进行排序。';
+  }
+
+  // 根据新数组重新渲染树和柱状图
+  renderTree();
+  renderBars();
+}
+
+/**
+ * 开始或继续执行堆排序算法。
+ * 由 "开始" 按钮点击触发。
+ */
+window.startHeapSort = async function () {
+  if (isSorting) return; // 如果当前已经在排序 (例如用户快速连续点击)，则不执行，防止重复启动
+
+  isSorting = true;  // 设置排序状态标志为 true
+  isPaused = false;  // 开始排序时，默认不暂停
+  if(startSortBtn) startSortBtn.disabled = true; // 禁用 "开始" 按钮，防止重复点击
+  if(initArrayBtn) initArrayBtn.disabled = true; // 在排序过程中禁用 "生成数组" 按钮
+  if(pauseBtn) pauseBtn.textContent = '暂停';    // 设置 "暂停/继续" 按钮的文本为 "暂停"
+  updateDescription("排序开始..."); // 更新步骤说明
+
+  // 淡出页面顶部的提示文字
+  const introAnimation = document.getElementById('intro-animation');
+  if (introAnimation) {
+    introAnimation.style.opacity = '0';
+    await sleep(300); // 等待淡出动画完成
+    introAnimation.style.display = 'none'; // 隐藏提示文字
+  }
+
+
+  await playStartSortTitleAnimation(); // 播放标题的开始动画
+
+  await heapSort(); // 调用堆排序的核心算法函数
+  // 排序完成后，按钮的重新启用等操作已在 heapSort 函数的末尾或 initArray 函数中处理
+}
+
+/**
+ * 暂停或继续当前的排序过程。
+ * 由 "暂停/继续" 按钮点击触发。
+ */
+window.pause = function () {
+  if (!isSorting) return; // 只有在排序正在进行时，暂停/继续才有意义
+
+  isPaused = !isPaused; // 切换暂停状态标志
+  if(pauseBtn) pauseBtn.textContent = isPaused ? '继续' : '暂停'; // 更新按钮文本
+  // 根据暂停状态更新步骤说明
+  if (isPaused) {
+      updateDescription("排序已暂停. 点击“继续”以恢复.");
+  } else {
+      updateDescription("排序已恢复. 继续执行...");
+  }
+}
+
+/**
+ * 当用户在倍速下拉选择框中选择新的速度时调用此函数。
+ * 更新全局的 pace 变量。
+ */
+window.changePace = function () {
+  const newPace = Number(paceSelect.value); // 获取选择框的数值
+  // 基础验证：确保获取到的 pace 是一个有效的正数
+  if (!isNaN(newPace) && newPace > 0) {
+      pace = newPace; // 更新全局 pace 变量
+  } else {
+      // 如果选择的值无效 (例如不是数字或小于等于0)，则将选择框的值恢复为当前的 pace 值
+      if(paceSelect) paceSelect.value = pace.toString();
+  }
+}
+
+/**
+ * 当整个 HTML 文档的 DOM 结构加载并解析完成后执行的初始化操作。
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // 为页面顶部的 "堆", "排", "序" 字符添加鼠标悬停动画的事件监听
+    const titleChars = document.querySelectorAll('.title-char');
+    titleChars.forEach(char => {
+        char.addEventListener('mouseenter', onElementMouseEnter);
+        char.addEventListener('mouseleave', onElementMouseLeave);
+    });
+
+    // 为整个柱状图容器 (#bars) 添加鼠标悬停动画的事件监听
+    const barsContainerElement = document.getElementById('bars');
+    if (barsContainerElement) { // 确保元素存在
+        barsContainerElement.addEventListener('mouseenter', onBarsContainerMouseEnter);
+        barsContainerElement.addEventListener('mouseleave', onBarsContainerMouseLeave);
+    }
+
+    // 确保在initArray调用前，所有按钮元素已经被正确获取
+    // （因为initArray内部可能会用到这些按钮，例如重置disabled状态）
+    // 如果按钮获取仍在全局作用域，这里不需要额外操作。
+    // 但更好的做法是将按钮获取也放在DOMContentLoaded内部，或在使用它们之前获取。
+    // 此处假设全局获取的按钮变量已经有效。
+
+    animateTitleCharsLoop(); // 启动标题字符的循环动画
+    window.initArray();             // 页面加载时，自动初始化数组和相关的可视化显示
+});
