@@ -1,0 +1,268 @@
+/*这里配色是ai配的，我提了要求以及进行微调，调色太难了/(ㄒoㄒ)/~~*/
+body {
+  background: #0A0F1E;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #D0DFFF;
+  line-height: 1.6;
+}
+
+.visualization-area {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px; 
+  margin: 20px auto; 
+  flex-wrap: wrap;
+}
+
+#tree-container {
+  position: relative;
+  width: 600px;
+  height: 320px;
+  background: #10172B;
+  border: 1px solid #2A3045;
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+}
+
+#tree-description-panel {
+  width: 260px; 
+  min-height: 320px;
+  padding: 15px;
+  background: #10172B;
+  border: 1px solid #2A3045;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  color: #AECBFF;
+  font-size: 0.95em;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column; 
+}
+
+#tree-description-panel h4 { 
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #00D9E1;
+  font-size: 1.1em;
+  border-bottom: 1px solid #2A3045;
+  padding-bottom: 8px;
+}
+
+#tree-description-panel #description-text {
+  margin: 0;
+  white-space: pre-wrap; 
+  overflow-y: auto; 
+  flex-grow: 1; 
+}
+
+
+.node {
+  position: absolute;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(145deg, #00F2FF, #00B6CC);
+  border: 1px solid #00FFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #050A14;
+  user-select: none;
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(0, 242, 255, 0.6), 0 2px 5px rgba(0,0,0,0.35);
+}
+
+.node:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 18px rgba(0, 242, 255, 0.8), 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.node.highlight {
+  background: linear-gradient(145deg, #FF3B9A, #D9006C);
+  border-color: #FF66B8;
+  box-shadow: 0 0 15px rgba(255, 59, 154, 0.7), 0 2px 5px rgba(0,0,0,0.35);
+  color: #FFFFFF;
+}
+
+svg line {
+  stroke: #404A69;
+  stroke-width: 2;
+}
+
+#bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 210px;
+  margin: 20px auto;
+  width: 600px;
+  max-width: 90%;
+  background: #181F38;
+  border: 1px solid #2A3045;
+  box-sizing: border-box;
+  position: relative;
+
+  border-radius: 8px;
+  padding: 10px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 38px;
+  margin: 0 3px;
+}
+
+.bar {
+  display: inline-block;
+  transform-origin: bottom center;
+  cursor: pointer;
+  transition: filter 0.2s ease-out, transform 0.2s ease-out;
+  width: 32px;
+  background: linear-gradient(to top, #00D9E1, #00EBC7);
+  color: #0A0F1E;
+  text-align: center;
+  padding-top: 5px;
+  box-sizing: border-box;
+  font-size: 12px;
+  box-shadow: 0 0 8px rgba(0, 235, 199, 0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+  border-radius: 5px 5px 0 0;
+}
+
+.bar:hover {
+  filter: brightness(1.15);
+}
+
+.bar.active {
+  background: linear-gradient(to top, #FFA800, #FFC04D);
+  box-shadow: 0 0 10px rgba(255, 168, 0, 0.6), inset 0 1px 2px rgba(255,255,255,0.1);
+  color: #10172B;
+}
+
+.bar.swap {
+  background: linear-gradient(to top, #A060FF, #C080FF);
+  box-shadow: 0 0 10px rgba(160, 96, 255, 0.6), inset 0 1px 2px rgba(255,255,255,0.1);
+  color: #FFFFFF;
+}
+
+.bar-index {
+  color: #8B98B3;
+  font-size: 12px;
+  margin-bottom: 4px;
+  height: 16px;
+  text-align: center;
+}
+
+.title-char {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-right: 10px;
+  background: linear-gradient(135deg, #00D9E1, #8A2BE2);
+  color: #FFFFFF;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 217, 225, 0.3), 0 0 15px rgba(138, 43, 226, 0.3);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.title-char:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 217, 225, 0.5), 0 0 20px rgba(138, 43, 226, 0.5);
+}
+
+#controls-area {
+  background: #10172B;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 30px auto 0 auto;
+  max-width: 700px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+#controls-area input[type="text"] {
+  background-color: #181F38;
+  border: 1px solid #2A3045;
+  color: #D0DFFF;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-right: 10px;
+  width: 250px;
+  font-size: 1em;
+}
+
+#controls-area input[type="text"]::placeholder {
+  color: #55627E;
+}
+
+#controls-area button,
+#controls-area select {
+  background: linear-gradient(to right, #00A9B5, #4A00E0);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  margin: 5px;
+  transition: transform 0.1s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+#controls-area button:hover:not(:disabled),
+#controls-area select:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+#controls-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #55627E;
+}
+
+
+#controls-area select {
+  padding: 10px 15px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='18px' height='18px'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+#controls-area select#paceSelect option { /* Ensured specificity */
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+
+#controls-area span#abc {
+  background-color: transparent;
+  border: none;
+  color: #8B98B3;
+  padding: 10px 5px 10px 15px;
+  border-radius: 5px;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+#intro-animation {
+  color: #00D9E1;
+  font-size: 1.1em;
+  margin-top: 15px;
+  text-shadow: 0 0 5px rgba(0, 217, 225, 0.5);
+}

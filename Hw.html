@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>堆排序可视化</title>
+  <link rel="stylesheet" href="Hw.css">
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+</head>
+<body>
+  <h2 style="text-align:center; margin-top:20px;">
+    <span class="title-char">堆</span>
+    <span class="title-char">排</span>
+    <span class="title-char">序</span>
+  </h2>
+
+  <div id="intro-animation" style="text-align:center; font-size:18px; margin-top:10px;">
+    准备进行排序
+  </div>
+
+  <!-- NEW: Wrapper for tree and its description -->
+  <div class="visualization-area">
+    <div id="tree-container"></div>
+    <div id="tree-description-panel">
+      <p id="description-text">等待操作...</p>
+    </div>
+  </div>
+
+  <div id="bars"></div>
+
+  <div id="controls-area">
+    <input id="userArray" type="text" placeholder="输入数组,如:12,34(半角逗号分隔)">
+    <button id="initArrayBtn" onclick="initArray()">生成无序数组</button>
+    <button id="startSortBtn" onclick="startHeapSort()">开始</button>
+    <button id="pauseBtn" onclick="pause()">暂停</button>
+    <span id="abc">
+      <label for="paceSelect">倍速</label>
+    </span>
+    <select id="paceSelect" onchange="changePace()">
+      <option value="1800">0.5×</option>
+      <option value="1200">0.75×</option>
+      <option value="900" selected>1×</option>
+      <option value="450">2×</option>
+      <option value="180">5×</option>
+    </select>
+  </div>
+
+  <script src="Hw.js"></script>
+</body>
+</html>
